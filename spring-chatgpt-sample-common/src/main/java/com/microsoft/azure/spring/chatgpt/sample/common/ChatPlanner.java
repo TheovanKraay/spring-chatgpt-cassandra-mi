@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 @RequiredArgsConstructor
 public class ChatPlanner {
@@ -31,7 +32,11 @@ public class ChatPlanner {
 
         // step 1. Convert the user's query text to an embedding
         var response = client.getEmbeddings(List.of(question));
-        var embedding = response.getData().get(0).getEmbedding();
+        Vector<Float> embedding = new Vector<>();
+        List<Double> resp = response.getData().get(0).getEmbedding();
+        for (var value: resp) {
+            embedding.add(value.floatValue());
+        }
 
         // step 2. Query Top-K nearest text chunks from the vector store
         var candidateDocs = store.searchTopKNearest(embedding, 5, 0.4).stream()

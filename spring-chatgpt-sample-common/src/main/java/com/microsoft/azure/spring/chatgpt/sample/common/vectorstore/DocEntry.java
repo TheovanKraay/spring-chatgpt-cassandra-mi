@@ -1,30 +1,32 @@
 package com.microsoft.azure.spring.chatgpt.sample.common.vectorstore;
 
+import com.datastax.oss.driver.api.core.data.CqlVector;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.cassandra.core.mapping.Table;
+//import org.springframework.data.annotation.Id;
+//import org.springframework.data.cassandra.core.mapping.Table;
 //import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
+import java.util.Vector;
 
-@Data
+//@Data
 @Builder
 @Jacksonized
 //@Document(collection = "vectorstore")
-@Table("vectorstore")
+//@Table("vectorstore")
 public class DocEntry {
 
-    @Id
+    //@Id
     private String id;
     private String hash;
     private String text;
-    private List<Double> embedding;
+    private Vector<Float> embedding;
 
     public DocEntry() {}
 
-    public DocEntry(String id, String hash, String text, List<Double> embedding) {
+    public DocEntry(String id, String hash, String text, Vector<Float> embedding) {
         this.id = id;
         this.hash = hash;
         this.text = text;
@@ -55,11 +57,11 @@ public class DocEntry {
         this.text = text;
     }
 
-    public List<Double> getEmbedding() {
+    public Vector<Float> getEmbedding() {
         return embedding;
     }
 
-    public void setEmbedding(List<Double> embedding) {
+    public void setEmbedding(Vector<Float> embedding) {
         this.embedding = embedding;
     }
 

@@ -4,12 +4,13 @@ import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.core.credential.AzureKeyCredential;
 import com.microsoft.azure.spring.chatgpt.sample.common.AzureOpenAIClient;
 import com.microsoft.azure.spring.chatgpt.sample.common.ChatPlanner;
+import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.CassandraUtils;
 import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.CosmosDBVectorStore;
 import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.cassandra.core.CassandraTemplate;
+//import org.springframework.data.cassandra.core.CassandraTemplate;
 //import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.io.IOException;
@@ -32,10 +33,7 @@ public class Config {
     @Value("${vector-store.file}")
     private String vectorJsonFile;
 
-    private CassandraTemplate cassandraTemplate;
-
-    public Config(CassandraTemplate cassandraTemplate) throws IOException {
-        this.cassandraTemplate = cassandraTemplate;
+    public Config() throws IOException {
     }
 
     @Bean
@@ -52,9 +50,14 @@ public class Config {
         return new AzureOpenAIClient(innerClient, embeddingDeploymentId, chatDeploymentId);
     }
 
+/*    @Bean
+    public CassandraUtils cassandraTemplate() throws IOException {
+        return new CassandraUtils();
+    }*/
+
     @Bean
     public VectorStore vectorStore() throws IOException {
-        CosmosDBVectorStore store = new CosmosDBVectorStore(cassandraTemplate);
+        CosmosDBVectorStore store = new CosmosDBVectorStore();
         String currentPath = new java.io.File(".").getCanonicalPath();;
         String path = currentPath+vectorJsonFile.replace(  "\\", "//");
         store.loadFromJsonFile(path);

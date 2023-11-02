@@ -8,7 +8,7 @@ This application utilizes the following Azure resources:
 
 - [**Azure Spring Apps**](https://docs.microsoft.com/azure/spring-apps/) to host the application
 - [**Azure OpenAI**](https://docs.microsoft.com/azure/cognitive-services/openai/) for ChatGPT
-- [**Azure Cosmos DB**](https://learn.microsoft.com/azure/cosmos-db/mongodb/vcore/) as the vector store database.
+- [**Azure Managed Instance for Apache Cassandra**](https://aka.ms/CassandraMIVectorStore) as the vector store database.
 
 Here's a high level architecture diagram that illustrates these components.
 
@@ -22,7 +22,7 @@ Here's a high level architecture diagram that illustrates these components.
    1. Load private documents from your local disk.
    1. Split the text into chunks.
    1. Convert text chunks into embeddings
-   1. Save the embeddings into Cosmos DB Vector Store
+   1. Save the embeddings into the Cassandra v5.0 Vector Store
 1. Query flow (Web API)
    1. Convert the user's query text to an embedding.
    1. Query Top-K nearest text chunks from the Cosmos DB vector store (by cosine similarity).
@@ -38,7 +38,7 @@ The following prerequisites are required to use this application. Please ensure 
 
 - [Git](http://git-scm.com/).
 - [Java 17 or later](https://learn.microsoft.com/java/openjdk/install)
-- [Azure Cosmos DB Mongo vCore account](https://docs.microsoft.com/azure/cosmos-db/mongodb/vcore/create-account)
+- [Azure Managed Instance for Apache Cassandra](https://learn.microsoft.com/azure/managed-instance-apache-cassandra/). **NOTE**: you must select Cassandra version 5.0 for vector search support.
 - An Azure OpenAI account (see more [here](https://customervoice.microsoft.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR7en2Ais5pxKtso_Pz4b1_xUOFA5Qk1UWDRBMjg0WFhPMkIzTzhKQ1dWNyQlQCN0PWcu))
 
 ### Quickstart
@@ -51,19 +51,16 @@ The following prerequisites are required to use this application. Please ensure 
    set AZURE_OPENAI_CHATDEPLOYMENTID=<Your Azure OpenAI chat deployment id>
    set AZURE_OPENAI_ENDPOINT=<Your Azure OpenAI endpoint>
    set AZURE_OPENAI_APIKEY=<Your Azure OpenAI API key>
-   set COSMOSDB_DATABASE=<Choose any database name>
-   set COSMOSDB_URI=<Cosmos DB Mongo vCore connection string>
-   set COSMOSDB_USERNAME=<Username you created for your Cosmos DB Mongo vCore cluster>
-   set COSMOSDB_PASSWORD=<Password you created for your Cosmos DB Mongo vCore cluster>
    ```
+3. Fill in the appropriate Cassandra variables in `application.conf` file for both CLI and webapi applications.   
 
-3. Build the application:
+4. Build the application:
 
    ```shell
    mvn clean package
    ```  
 
-4. The following command will read and process your own private text documents, create a Cosmos DB Mongo vCore collection with vector index, and load the processed documents into it:
+5. The following command will read and process your own private text documents, create a Cosmos DB Mongo vCore collection with vector index, and load the processed documents into it:
 
    ```shell
       java -jar spring-chatgpt-sample-cli/target/spring-chatgpt-sample-cli-0.0.1-SNAPSHOT.jar --from=C:/<path you your private text docs>
@@ -71,12 +68,12 @@ The following prerequisites are required to use this application. Please ensure 
    ```
    > Note: if you don't run the above to process your own documents, at first startup the application will read a pre-provided and pre-processed `vector-store.json` file in `private-data` folder, and load those documents into Cosmos DB instead.
 
-5. Run the following command to build and run the application:
+6. Run the following command to build and run the application:
 
    ```shell
    java -jar spring-chatgpt-sample-webapi/target/spring-chatgpt-sample-webapi-0.0.1-SNAPSHOT.jar
    ```
-6. Open your browser and navigate to `http://localhost:8080/`. You should see the below page. Test it out by typing in a question and clicking `Send`.
+7. Open your browser and navigate to `http://localhost:8080/`. You should see the below page. Test it out by typing in a question and clicking `Send`.
 
    !["Screenshot of deployed chatgpt app"](assets/chatgpt.png)
 

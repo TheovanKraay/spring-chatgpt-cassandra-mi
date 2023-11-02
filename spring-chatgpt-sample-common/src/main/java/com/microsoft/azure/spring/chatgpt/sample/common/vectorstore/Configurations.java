@@ -1,4 +1,4 @@
-package com.azure.cassandrami.util;
+package com.microsoft.azure.spring.chatgpt.sample.common.vectorstore;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

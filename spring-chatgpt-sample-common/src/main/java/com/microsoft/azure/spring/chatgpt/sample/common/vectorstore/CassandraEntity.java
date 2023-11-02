@@ -1,8 +1,10 @@
 package com.microsoft.azure.spring.chatgpt.sample.common.vectorstore;
 
-import org.springframework.data.annotation.Id;
+//import org.springframework.data.annotation.Id;
 //import org.springframework.data.cassandra.core.mapping.Table;
 //import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.datastax.oss.driver.api.core.data.CqlVector;
 
 import java.util.List;
 import java.util.Vector;
@@ -10,16 +12,18 @@ import java.util.Vector;
 //@Document(collection = "vectorstore")
 //@Table("vectorstore")
 public class CassandraEntity {
-    @Id
+    //@Id
     private String id;
     private String hash;
     private String text;
+    private CqlVector<Float> embedding;
 
     public CassandraEntity() {}
-    public CassandraEntity(String id, String hash, String text) {
+    public CassandraEntity(String id, String hash, String text, CqlVector<Float> embedding) {
         this.id = id;
         this.hash = hash;
         this.text = text;
+        this.embedding = embedding;
     }
 
     public String getId() {
@@ -46,13 +50,13 @@ public class CassandraEntity {
         this.text = text;
     }
 
-/*    public Vector<Float> getEmbedding() {
+    public CqlVector<Float> getEmbedding() {
         return embedding;
     }
 
-    public void setEmbedding(Vector<Float> embedding) {
+    public void setEmbedding(CqlVector<Float> embedding) {
         this.embedding = embedding;
-    }*/
+    }
 
     @Override
     public String toString() {
@@ -60,7 +64,7 @@ public class CassandraEntity {
                 "id='" + id + '\'' +
                 ", hash='" + hash + '\'' +
                 ", text='" + text + '\'' +
-/*                ", embedding='" + embedding + '\'' +*/
+                ", embedding='" + embedding + '\'' +
                 '}';
     }
 }
