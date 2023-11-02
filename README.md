@@ -1,4 +1,4 @@
-# Spring ChatGPT Sample with Azure Cosmos DB
+# Spring ChatGPT Sample with Azure Managed Instance for Apache Cassandra
 
 This sample shows how to build a ChatGPT like application in Spring and run on Azure Spring Apps with Azure Cosmos DB. The vector store in Azure Cosmos DB enables ChatGPT to use your private data to answer the questions.
 
