@@ -1,12 +1,12 @@
 # Spring ChatGPT Sample with Azure Managed Instance for Apache Cassandra
 
-This sample shows how to build a ChatGPT like application in Spring and run on Azure Spring Apps with Azure Cosmos DB. The vector store in Azure Cosmos DB enables ChatGPT to use your private data to answer the questions.
+This sample shows how to build a ChatGPT like application in Spring using Azure OpenAI and Azure Managed Instance for Apache Cassandra (version 5.0) as a vector store. This enables OpenAI to use your private data to answer the questions.
 
 ### Application Architecture
 
 This application utilizes the following Azure resources:
 
-- [**Azure Spring Apps**](https://docs.microsoft.com/azure/spring-apps/) to host the application
+- Java Spring Boot Framework to host the application
 - [**Azure OpenAI**](https://docs.microsoft.com/azure/cognitive-services/openai/) for ChatGPT
 - [**Azure Managed Instance for Apache Cassandra**](https://aka.ms/CassandraMIVectorStore) as the vector store database.
 
@@ -25,7 +25,7 @@ Here's a high level architecture diagram that illustrates these components.
    1. Save the embeddings into the Cassandra v5.0 Vector Store
 1. Query flow (Web API)
    1. Convert the user's query text to an embedding.
-   1. Query Top-K nearest text chunks from the Cosmos DB vector store (by cosine similarity).
+   1. Query Top-K nearest text chunks from the Cassandra 5.0 vector store (by cosine similarity).
    1. Populate the prompt template with the chunks.
    1. Call to OpenAI text completion API.
 
@@ -76,13 +76,13 @@ The following prerequisites are required to use this application. Please ensure 
    mvn clean package
    ```  
 
-4. The following command will read and process your own private text documents, create a Cosmos DB Mongo vCore collection with vector index, and load the processed documents into it:
+4. The following command will read and process your own private text documents, create a Cassandra 5.0 keyspace and table with vector index, and load the processed documents into it:
 
    ```shell
       java -jar spring-chatgpt-sample-cli/target/spring-chatgpt-sample-cli-0.0.1-SNAPSHOT.jar --from=C:/<path you your private text docs>
 
    ```
-   > Note: if you don't run the above to process your own documents, at first startup the application will read a pre-provided and pre-processed `vector-store.json` file in `private-data` folder, and load those documents into Cosmos DB instead.
+   > Note: if you don't run the above to process your own documents, at first startup the application will read a pre-provided and pre-processed `vector-store.json` file in `private-data` folder, and load those documents into Cassandra instead.
 
 5. Run the following command to build and run the application:
 
