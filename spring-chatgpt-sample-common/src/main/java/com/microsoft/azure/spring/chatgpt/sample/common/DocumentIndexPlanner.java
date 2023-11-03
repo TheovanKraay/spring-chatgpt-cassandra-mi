@@ -71,6 +71,6 @@ public class DocumentIndexPlanner {
             log.info("Index already exists");
         }
 
-        log.info("All documents are loaded to Cosmos DB vCore vector store.");
+        log.info("All documents are loaded to Cassandra 5.0 vector store.");
     }
 }
