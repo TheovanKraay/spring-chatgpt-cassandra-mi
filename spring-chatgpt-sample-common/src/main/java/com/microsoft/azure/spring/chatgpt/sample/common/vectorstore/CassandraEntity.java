@@ -1,25 +1,22 @@
 package com.microsoft.azure.spring.chatgpt.sample.common.vectorstore;
-
-//import org.springframework.data.annotation.Id;
-//import org.springframework.data.cassandra.core.mapping.Table;
-//import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.datastax.oss.driver.api.core.data.CqlVector;
-
-import java.util.List;
+import lombok.Builder;
+import lombok.extern.jackson.Jacksonized;
 import java.util.Vector;
 
-//@Document(collection = "vectorstore")
-//@Table("vectorstore")
-public class CassandraEntity {
+//@Data
+@Builder
+@Jacksonized
+public class DocEntry {
+
     //@Id
     private String id;
     private String hash;
     private String text;
-    private CqlVector<Float> embedding;
+    private Vector<Float> embedding;
 
-    public CassandraEntity() {}
-    public CassandraEntity(String id, String hash, String text, CqlVector<Float> embedding) {
+    public DocEntry() {}
+
+    public DocEntry(String id, String hash, String text, Vector<Float> embedding) {
         this.id = id;
         this.hash = hash;
         this.text = text;
@@ -50,21 +47,23 @@ public class CassandraEntity {
         this.text = text;
     }
 
-    public CqlVector<Float> getEmbedding() {
+    public Vector<Float> getEmbedding() {
         return embedding;
     }
 
-    public void setEmbedding(CqlVector<Float> embedding) {
+    public void setEmbedding(Vector<Float> embedding) {
         this.embedding = embedding;
     }
 
     @Override
     public String toString() {
-        return "Vector{" +
+        return "DocEntry{" +
                 "id='" + id + '\'' +
                 ", hash='" + hash + '\'' +
                 ", text='" + text + '\'' +
                 ", embedding='" + embedding + '\'' +
                 '}';
     }
+
 }
+
