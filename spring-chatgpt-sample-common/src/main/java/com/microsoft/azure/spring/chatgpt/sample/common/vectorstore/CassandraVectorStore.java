@@ -16,22 +16,31 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class CosmosDBVectorStore implements VectorStore {
+public class CassandraVectorStore implements VectorStore {
     private final VectorStoreData data;
 
-    private CassandraUtils cassandraTemplate;
+    private CassandraTemplate cassandraTemplate;
 
-    public CosmosDBVectorStore() throws IOException {
+    public CassandraVectorStore() throws IOException {
         this.data = new VectorStoreData();
-        this.cassandraTemplate =  new CassandraUtils();
+        this.cassandraTemplate =  new CassandraTemplate();
     }
     @Override
-    public void saveDocument(String key, DocEntry doc) throws IOException {
-        cassandraTemplate.insert(doc);
+    public void saveDocument(String key, CassandraEntity row) throws IOException {
+        cassandraTemplate.insert(row);
     }
 
     @Override
-    public DocEntry getDocument(String key) {
+    public void saveDocuments(List<CassandraEntity> rows) throws IOException {
+        try {
+            cassandraTemplate.insertMany(rows);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public CassandraEntity getDocument(String key) {
         var doc = cassandraTemplate.selectOneById(key);
         return doc;
     }
@@ -42,15 +51,15 @@ public class CosmosDBVectorStore implements VectorStore {
     }
 
     @Override
-    public List<DocEntry> searchTopKNearest(Vector<Float> embedding, int k) {
+    public List<CassandraEntity> searchTopKNearest(Vector<Float> embedding, int k) {
         return searchTopKNearest(embedding, k, 0);
     }
 
     @Override
-    public List<DocEntry> searchTopKNearest(Vector<Float> embedding, int k, double cutOff) {
+    public List<CassandraEntity> searchTopKNearest(Vector<Float> embedding, int k, double cutOff) {
         // perform vector search in cassandra
         CqlVector<Float> openaiembedding = CqlVector.newInstance(embedding);
-        List<DocEntry> result = new ArrayList<>();
+        List<CassandraEntity> result = new ArrayList<>();
         log.info("Getting top {} nearest neighbors - Cassandra MI 5.0 Vector Search",k );
         ResultSet resultSet = cassandraTemplate.cassandraSession.execute("SELECT id, hash, text, embedding, similarity_cosine(embedding, ?) as similarity FROM "+cassandraTemplate.keyspace+"."+cassandraTemplate.vectorstore+" ORDER BY embedding ANN OF ? LIMIT "+k+"", openaiembedding, openaiembedding);
         for (Row row : resultSet) {
@@ -62,8 +71,8 @@ public class CosmosDBVectorStore implements VectorStore {
             for (Float f : embedding1) {
                 embedding2.add(f);
             }
-            DocEntry docEntry = new DocEntry(id, hash, text, embedding2);
-            result.add(docEntry);
+            CassandraEntity cassandraEntity = new CassandraEntity(id, hash, text, embedding2);
+            result.add(cassandraEntity);
         }
         log.info("Embedding search complete");
         return result;
@@ -74,14 +83,15 @@ public class CosmosDBVectorStore implements VectorStore {
         cassandraTemplate.cassandraSession.execute(statement);
     }
 
-    public List<DocEntry> loadFromJsonFile(String filePath) {
+    public List<CassandraEntity> loadFromJsonFile(String filePath) {
         var reader = new ObjectMapper().reader();
         try {
             int dimensions = 0;
             Row FirstDocFound = cassandraTemplate.selectOne();
             if (FirstDocFound == null) {
+                log.info("No vector search data found. Loading default data from file: {} .....", filePath);
                 var data = reader.readValue(new File(filePath), VectorStoreData.class);
-                List<DocEntry> list = new ArrayList<DocEntry>(data.store.values());
+                List<CassandraEntity> list = new ArrayList<CassandraEntity>(data.store.values());
                 cassandraTemplate.insertMany(list);
                 try {
                     createVectorIndex(100, dimensions, "COS");
@@ -101,6 +111,6 @@ public class CosmosDBVectorStore implements VectorStore {
     @Setter
     @Getter
     private static class VectorStoreData {
-        private Map<String, DocEntry> store = new ConcurrentHashMap<>();
+        private Map<String, CassandraEntity> store = new ConcurrentHashMap<>();
     }
 }

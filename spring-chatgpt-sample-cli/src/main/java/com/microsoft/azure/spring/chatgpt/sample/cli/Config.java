@@ -4,8 +4,7 @@ import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.core.credential.AzureKeyCredential;
 import com.microsoft.azure.spring.chatgpt.sample.common.AzureOpenAIClient;
 import com.microsoft.azure.spring.chatgpt.sample.common.DocumentIndexPlanner;
-//import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.CassandraUtils;
-import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.CosmosDBVectorStore;
+import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.CassandraVectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,28 +26,20 @@ public class Config {
     @Value("${AZURE_OPENAI_APIKEY}")
     private String apiKey;
 
-    //private CassandraTemplate cassandraTemplate;
-    //private CassandraUtils cassandraTemplate;
-
     public Config() throws IOException {
-        //this.cassandraTemplate = new CassandraUtils();
     }
 
     @Bean
-    public DocumentIndexPlanner planner(AzureOpenAIClient openAIClient, CosmosDBVectorStore vectorStore) throws IOException {
+    public DocumentIndexPlanner planner(AzureOpenAIClient openAIClient, CassandraVectorStore vectorStore) throws IOException {
         return new DocumentIndexPlanner(openAIClient);
     }
 
     @Bean
-    public CosmosDBVectorStore vectorStore() throws IOException {
-        CosmosDBVectorStore store = new CosmosDBVectorStore();
+    public CassandraVectorStore vectorStore() throws IOException {
+        CassandraVectorStore store = new CassandraVectorStore();
         return store;
     }
 
-/*    @Bean
-    public CassandraUtils cassandraTemplate() throws IOException {
-        return new CassandraUtils();
-    }*/
     @Bean
     public AzureOpenAIClient AzureOpenAIClient() {
         var innerClient = new OpenAIClientBuilder()

@@ -5,13 +5,15 @@ import java.util.List;
 import java.util.Vector;
 
 public interface VectorStore {
-    void saveDocument(String key, DocEntry doc) throws IOException;
+    void saveDocument(String key, CassandraEntity doc) throws IOException;
 
-    DocEntry getDocument(String key);
+    void saveDocuments(List<CassandraEntity> docs) throws IOException;
+
+    CassandraEntity getDocument(String key);
 
     void removeDocument(String key);
 
-    List<DocEntry> searchTopKNearest(Vector<Float> embedding, int k);
+    List<CassandraEntity> searchTopKNearest(Vector<Float> embedding, int k);
 
-    List<DocEntry> searchTopKNearest(Vector<Float> embedding, int k, double cutOff);
+    List<CassandraEntity> searchTopKNearest(Vector<Float> embedding, int k, double cutOff);
 }

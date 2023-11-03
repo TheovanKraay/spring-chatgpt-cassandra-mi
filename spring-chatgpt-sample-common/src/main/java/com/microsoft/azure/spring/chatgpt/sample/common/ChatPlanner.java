@@ -4,7 +4,7 @@ import com.azure.ai.openai.models.ChatCompletions;
 import com.azure.ai.openai.models.ChatMessage;
 import com.azure.ai.openai.models.ChatRole;
 import com.microsoft.azure.spring.chatgpt.sample.common.prompt.PromptTemplate;
-import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.DocEntry;
+import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.CassandraEntity;
 import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.VectorStore;
 import lombok.RequiredArgsConstructor;
 
@@ -40,7 +40,7 @@ public class ChatPlanner {
 
         // step 2. Query Top-K nearest text chunks from the vector store
         var candidateDocs = store.searchTopKNearest(embedding, 5, 0.4).stream()
-                .map(DocEntry::getText).toList();
+                .map(CassandraEntity::getText).toList();
 
         // step 3. Populate the prompt template with the chunks
         var prompt = PromptTemplate.formatWithContext(candidateDocs, question);

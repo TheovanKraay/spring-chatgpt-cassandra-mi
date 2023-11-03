@@ -4,8 +4,7 @@ import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.core.credential.AzureKeyCredential;
 import com.microsoft.azure.spring.chatgpt.sample.common.AzureOpenAIClient;
 import com.microsoft.azure.spring.chatgpt.sample.common.ChatPlanner;
-import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.CassandraUtils;
-import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.CosmosDBVectorStore;
+import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.CassandraVectorStore;
 import com.microsoft.azure.spring.chatgpt.sample.common.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -57,7 +56,7 @@ public class Config {
 
     @Bean
     public VectorStore vectorStore() throws IOException {
-        CosmosDBVectorStore store = new CosmosDBVectorStore();
+        CassandraVectorStore store = new CassandraVectorStore();
         String currentPath = new java.io.File(".").getCanonicalPath();;
         String path = currentPath+vectorJsonFile.replace(  "\\", "//");
         store.loadFromJsonFile(path);

@@ -51,16 +51,32 @@ The following prerequisites are required to use this application. Please ensure 
    set AZURE_OPENAI_CHATDEPLOYMENTID=<Your Azure OpenAI chat deployment id>
    set AZURE_OPENAI_ENDPOINT=<Your Azure OpenAI endpoint>
    set AZURE_OPENAI_APIKEY=<Your Azure OpenAI API key>
+   set CASSANDRA_USERNAME=<Your Cassandra username>
+   set CASSANDRA_PASSWORD=<Your Cassandra password>
+   set CASSANDRA_CONTACT_POINT=<IP Address from one node in your Cassandra Managed Instance cluster>
    ```
-3. Fill in the appropriate Cassandra variables in `application.conf` file for both CLI and webapi applications.   
+   NOTE: The `CASSANDRA_CONTACT_POINT` variable should include the port, e.g.: `10.41.1.11:9042`
 
-4. Build the application:
+   If you are using Windows PowerShell, set the environment variables like the following:
+
+   ```shell
+   $env:AZURE_OPENAI_EMBEDDINGDEPLOYMENTID="<Your OpenAI embedding deployment id>"
+   $env:AZURE_OPENAI_CHATDEPLOYMENTID="<Your Azure OpenAI chat deployment id>"
+   $env:AZURE_OPENAI_ENDPOINT="<Your Azure OpenAI endpoint>"
+   $env:AZURE_OPENAI_APIKEY="<Your Azure OpenAI API key>"
+   $env:CASSANDRA_USERNAME="<Your Cassandra username>"
+   $env:CASSANDRA_PASSWORD="<Your Cassandra password>"
+   $env:CASSANDRA_CONTACT_POINT="<IP Address from one node in your Cassandra Managed Instance cluster>"
+   ```
+
+
+3. Build the application:
 
    ```shell
    mvn clean package
    ```  
 
-5. The following command will read and process your own private text documents, create a Cosmos DB Mongo vCore collection with vector index, and load the processed documents into it:
+4. The following command will read and process your own private text documents, create a Cosmos DB Mongo vCore collection with vector index, and load the processed documents into it:
 
    ```shell
       java -jar spring-chatgpt-sample-cli/target/spring-chatgpt-sample-cli-0.0.1-SNAPSHOT.jar --from=C:/<path you your private text docs>
@@ -68,12 +84,12 @@ The following prerequisites are required to use this application. Please ensure 
    ```
    > Note: if you don't run the above to process your own documents, at first startup the application will read a pre-provided and pre-processed `vector-store.json` file in `private-data` folder, and load those documents into Cosmos DB instead.
 
-6. Run the following command to build and run the application:
+5. Run the following command to build and run the application:
 
    ```shell
    java -jar spring-chatgpt-sample-webapi/target/spring-chatgpt-sample-webapi-0.0.1-SNAPSHOT.jar
    ```
-7. Open your browser and navigate to `http://localhost:8080/`. You should see the below page. Test it out by typing in a question and clicking `Send`.
+6. Open your browser and navigate to `http://localhost:8080/`. You should see the below page. Test it out by typing in a question and clicking `Send`.
 
    !["Screenshot of deployed chatgpt app"](assets/chatgpt.png)
 

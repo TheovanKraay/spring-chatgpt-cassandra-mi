@@ -6,7 +6,7 @@ import java.util.Vector;
 //@Data
 @Builder
 @Jacksonized
-public class DocEntry {
+public class CassandraEntity {
 
     //@Id
     private String id;
@@ -14,9 +14,9 @@ public class DocEntry {
     private String text;
     private Vector<Float> embedding;
 
-    public DocEntry() {}
+    public CassandraEntity() {}
 
-    public DocEntry(String id, String hash, String text, Vector<Float> embedding) {
+    public CassandraEntity(String id, String hash, String text, Vector<Float> embedding) {
         this.id = id;
         this.hash = hash;
         this.text = text;

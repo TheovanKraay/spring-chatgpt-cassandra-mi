@@ -4,32 +4,38 @@ import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.core.data.CqlVector;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
+import java.util.concurrent.TimeUnit;
 
-public class CassandraUtils {
+@Slf4j
+public class CassandraTemplate {
 
     CqlSession cassandraSession;
     String vectorstore;
     String keyspace;
 
-    public CassandraUtils() throws IOException {
+    public CassandraTemplate() throws IOException {
         //CREATE TABLE vectorstore (id text PRIMARY KEY, hash text, text text, embedding vector <float, 1536> );
         Configurations config = new Configurations();
         String dc = config.getProperty("DC");
         this.vectorstore = config.getProperty("table");
         this.keyspace = config.getProperty("keyspace");
         cassandraSession = CqlSession.builder().withLocalDatacenter(dc).build();
+        log.info("Creating keyspace and table if not exists...");
+        cassandraSession.execute("CREATE KEYSPACE IF NOT EXISTS "+keyspace+" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}");
+        cassandraSession.execute("CREATE TABLE IF NOT EXISTS "+keyspace+"."+vectorstore+" (id text PRIMARY KEY, hash text, text text, embedding vector <float, 1536> )");
+        log.info("Finished creating keyspace and table if not exists.");
     }
 
-    public List<DocEntry> insertMany(List<DocEntry> entities) throws IOException {
+    public List<CassandraEntity> insertMany(List<CassandraEntity> entities) throws IOException, InterruptedException {
         final ExecutorService es = Executors.newCachedThreadPool();
-        for (DocEntry entity : entities) {
+        for (CassandraEntity entity : entities) {
             es.execute(() -> {
                 try {
                     insert(entity);
@@ -38,19 +44,28 @@ public class CassandraUtils {
                 }
             });
         }
+        es.shutdown();
+
+        final boolean finished = es.awaitTermination(5, TimeUnit.MINUTES);
+
+        if (finished) {
+            log.info("Loaded {} rows of contextual vector search data", entities.size());
+        } else {
+            log.info("Timeout elapsed before completion of insertMany");
+        }
         return entities;
     }
 
-    public DocEntry insert(DocEntry entity) throws IOException {
+    public CassandraEntity insert(CassandraEntity entity) throws IOException {
 
         CqlVector vector = CqlVector.newInstance(entity.getEmbedding());
         cassandraSession.execute("INSERT INTO "+keyspace+"."+vectorstore+" (id, hash, text, embedding) VALUES (?, ?, ?, ?)",
                 entity.getId(), entity.getHash(), entity.getText(), vector);
         return entity;
     }
-    public DocEntry selectOneById(Object id) {
-        DocEntry doc = new DocEntry();
-        doc = cassandraSession.execute("SELECT * FROM "+keyspace+"."+vectorstore+" WHERE id = ?", id).one().get(0, DocEntry.class);
+    public CassandraEntity selectOneById(Object id) {
+        CassandraEntity doc = new CassandraEntity();
+        doc = cassandraSession.execute("SELECT * FROM "+keyspace+"."+vectorstore+" WHERE id = ?", id).one().get(0, CassandraEntity.class);
         return doc;
     }
 
@@ -70,9 +85,9 @@ public class CassandraUtils {
         return row;
     }
 
-    public List<DocEntry> select(String cql) {
-        List<DocEntry> docs = cassandraSession.execute(cql).all().stream().map(row -> {
-            DocEntry doc = new DocEntry();
+    public List<CassandraEntity> select(String cql) {
+        List<CassandraEntity> docs = cassandraSession.execute(cql).all().stream().map(row -> {
+            CassandraEntity doc = new CassandraEntity();
             doc.setId(row.getString("id"));
             doc.setHash(row.getString("hash"));
             doc.setText(row.getString("text"));
