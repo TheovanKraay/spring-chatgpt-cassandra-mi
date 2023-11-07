@@ -28,7 +28,7 @@ public class CassandraTemplate {
         this.keyspace = config.getProperty("keyspace");
         cassandraSession = CqlSession.builder().withLocalDatacenter(dc).build();
         log.info("Creating keyspace and table if not exists...");
-        cassandraSession.execute("CREATE KEYSPACE IF NOT EXISTS "+keyspace+" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}");
+        cassandraSession.execute("CREATE KEYSPACE IF NOT EXISTS "+keyspace+" WITH replication = {'class': 'NetworkTopologyStrategy', '"+dc+"': '3'}");
         cassandraSession.execute("CREATE TABLE IF NOT EXISTS "+keyspace+"."+vectorstore+" (id text PRIMARY KEY, hash text, text text, embedding vector <float, 1536> )");
         log.info("Finished creating keyspace and table if not exists.");
     }
